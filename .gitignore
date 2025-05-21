@@ -1,0 +1,7 @@
+videos/
+videos/*
+
+outputs/
+outputs/*
+
+*.mp4
