@@ -94,7 +94,9 @@ def main():
         args = parse_args()
         print(f"Arguments parsed successfully")
         device = "cuda" if torch.cuda.is_available() else "cpu"
+        # set custom device here # device = "cpu"
         print(f"Using device: {device}")
+        
         base = os.path.join(script_dir, "models")
         base = Path(base)
         print(f"Models directory: {base}")
@@ -106,6 +108,7 @@ def main():
         if not os.path.exists(food_path):
             print(f"ERROR: Food model not found at {food_path}")
             return
+        
         tray_model, food_model = load_models(tray_path, food_path, device)
         video_out_dir = os.path.dirname(args.video_out)
         if args.save_display and video_out_dir and not os.path.exists(video_out_dir):
@@ -149,12 +152,13 @@ def main():
                 continue
             frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
             if frame_idx % args.skip_frames == 0 or prev_gray is None:
-                trays = detect_trays(frame, tray_model, args.tray_conf)
+                trays = detect_trays(frame, tray_model, args.tray_conf, device)
                 frame = draw_trays(frame, trays)
                 foods = detect_food(
                     frame, food_model, args.food_conf,
                     ["banana", "apple", "sandwich", "orange", "broccoli",
-                     "carrot", "hot dog", "pizza", "donut", "cake"]
+                     "carrot", "hot dog", "pizza", "donut", "cake"],
+                     device
                 )
                 frame = draw_food(frame, foods, trays, args.intersection_thresh)
                 prev_gray = frame_gray.copy()

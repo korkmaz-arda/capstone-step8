@@ -11,9 +11,9 @@ from shapely.geometry import Polygon
 from utils.bbox import bbox2poly
 
 
-def detect_trays(frame, tray_model, tray_min_conf):
-    # tray_results = tray_model.predict(frame, device=0, verbose=False)
-    tray_results = tray_model.predict(frame, device='cpu', verbose=False)
+def detect_trays(frame, tray_model, tray_min_conf, device):
+    tray_results = tray_model.predict(frame, device=device, verbose=False)
+    # tray_results = tray_model.predict(frame, device='cpu', verbose=False)
     tray_polygons = []
     for result in tray_results:
         boxes = result.boxes
@@ -39,10 +39,9 @@ def draw_trays(frame, tray_polygons):
     return frame
 
 
-def detect_food(frame, food_model, food_min_conf, class_filter):
-    # food_results = food_model.predict(frame, device=0, verbose=False)
-    food_results = food_model.predict(frame, device='cpu', verbose=False)
-    
+def detect_food(frame, food_model, food_min_conf, class_filter, device):
+    food_results = food_model.predict(frame, device=device, verbose=False)
+    # food_results = food_model.predict(frame, device='cpu', verbose=False)
     food_detections = []
     for result in food_results:
         boxes = result.boxes
@@ -95,18 +94,17 @@ def track_lucas_kanade(prev_frame_gray, curr_frame_gray, prev_boxes):
         if p0 is None:
             continue
 
-        # Offset p0 to absolute frame coordinates
+        # offset p0 to absolute frame coordinates
         p0 += np.array([[x1, y1]])
 
         p1, st, err = cv2.calcOpticalFlowPyrLK(prev_frame_gray, curr_frame_gray, p0, None, **lk_params)
         if p1 is None or st.sum() < 3:
             continue
 
-        # Calculate movement
         movement = p1 - p0
         dx, dy = np.mean(movement, axis=0).flatten()
 
-        # Shift box
+        # shift box
         new_box = [x1 + dx, y1 + dy, x2 + dx, y2 + dy]
         tracked_boxes.append(new_box)
 

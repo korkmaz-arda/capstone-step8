@@ -4,4 +4,6 @@ videos/*
 outputs/
 outputs/*
 
+*/__pycache__/
+
 *.mp4
